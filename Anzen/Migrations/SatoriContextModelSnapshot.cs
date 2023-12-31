@@ -17,6 +17,34 @@ namespace Anzen.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
 
+            modelBuilder.Entity("Anzen.Models.Coverage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Coverage");
+                });
+
+            modelBuilder.Entity("Anzen.Models.CoverageSubmission", b =>
+                {
+                    b.Property<int>("SubmissionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CoverageId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("SubmissionId", "CoverageId");
+
+                    b.ToTable("Submission_Coverage");
+                });
+
             modelBuilder.Entity("Anzen.Models.Status", b =>
                 {
                     b.Property<int>("Id")
@@ -35,6 +63,7 @@ namespace Anzen.Migrations
             modelBuilder.Entity("Anzen.Models.Submission", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AccountName")
@@ -55,24 +84,59 @@ namespace Anzen.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("StatusId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("UwName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("StatusId");
+
                     b.ToTable("Submission");
+                });
+
+            modelBuilder.Entity("CoverageSubmission", b =>
+                {
+                    b.Property<int>("CoveragesId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SubmissionsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CoveragesId", "SubmissionsId");
+
+                    b.HasIndex("SubmissionsId");
+
+                    b.ToTable("CoverageSubmission");
                 });
 
             modelBuilder.Entity("Anzen.Models.Submission", b =>
                 {
                     b.HasOne("Anzen.Models.Status", "Status")
                         .WithMany()
-                        .HasForeignKey("Id")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("CoverageSubmission", b =>
+                {
+                    b.HasOne("Anzen.Models.Coverage", null)
+                        .WithMany()
+                        .HasForeignKey("CoveragesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Anzen.Models.Submission", null)
+                        .WithMany()
+                        .HasForeignKey("SubmissionsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -23,11 +23,11 @@ if (app.Environment.IsDevelopment())
 app.MapGet("/submissions", async (SatoriContext context, int page = 1, int pageSize = 10) =>
 {
     var submissions = await context.Submission
-    .Include(s => s.Status)
-        //.ThenInclude(sc => sc.Coverage)
-    .Skip((page - 1) * pageSize)
-    .Take(pageSize)
-    .ToListAsync();
+        .Include(s => s.Status)
+        .Include(s => s.Coverages)
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
 
     return submissions;
 });
@@ -38,8 +38,9 @@ app.MapGet("/submissions/{id}", async (string id, HttpContext httpContext) =>
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<SatoriContext>();
     var submission = await context.Submission
-            .Include(s => s.Status)
-            .FirstOrDefaultAsync(s => s.Id == int.Parse(id));
+        .Include(s => s.Status)
+        .Include(s => s.Coverages)
+        .FirstOrDefaultAsync(s => s.Id == int.Parse(id));
 
     if (submission is null)
     {

@@ -20,14 +20,16 @@ namespace Anzen.Models
         public DateOnly EffectiveDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
         [Required]
-        public DateOnly ExpirationDate { get; set; } = DateOnly.FromDateTime(new DateTime(DateTime.Today.Year + 1, DateTime.Today.Month, DateTime.Today.Day)) ;
+        public DateOnly ExpirationDate { get; set; } = DateOnly.FromDateTime(new DateTime(DateTime.Today.Year + 1, DateTime.Today.Month, DateTime.Today.Day));
 
         [Required]
         public string? Sic { get; set; } = null!;
 
         [Required]
-        [ForeignKey("Id")]
+        [ForeignKey("StatusId")]
         public Status Status { get; set; } = null!;
+
+        public List<Coverage> Coverages { get; set; } = new();
     }
 
 }
