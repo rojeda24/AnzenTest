@@ -14,7 +14,7 @@ namespace Anzen.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=satori.db");//Security and scalability outside the scope 
+            optionsBuilder.UseSqlite("Data Source=satori.db");//Security and scalability outside scope 
         }
     }
 }
