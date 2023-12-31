@@ -24,6 +24,7 @@ app.MapGet("/submissions", async (SatoriContext context, int page = 1, int pageS
 {
     var submissions = await context.Submission
     .Include(s => s.Status)
+        //.ThenInclude(sc => sc.Coverage)
     .Skip((page - 1) * pageSize)
     .Take(pageSize)
     .ToListAsync();
