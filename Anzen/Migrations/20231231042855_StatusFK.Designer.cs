@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Anzen.Migrations
 {
     [DbContext(typeof(SatoriContext))]
-    [Migration("20231231025741_SubmissionMoreFields")]
-    partial class SubmissionMoreFields
+    [Migration("20231231042855_StatusFK")]
+    partial class StatusFK
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,10 +20,24 @@ namespace Anzen.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
 
-            modelBuilder.Entity("Anzen.Models.Submission", b =>
+            modelBuilder.Entity("Anzen.Models.Status", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Status");
+                });
+
+            modelBuilder.Entity("Anzen.Models.Submission", b =>
+                {
+                    b.Property<int>("Id")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AccountName")
@@ -51,6 +65,17 @@ namespace Anzen.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Submission");
+                });
+
+            modelBuilder.Entity("Anzen.Models.Submission", b =>
+                {
+                    b.HasOne("Anzen.Models.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Status");
                 });
 #pragma warning restore 612, 618
         }

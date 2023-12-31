@@ -3,6 +3,7 @@ using System;
 using Anzen.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Anzen.Migrations
 {
     [DbContext(typeof(SatoriContext))]
-    partial class SatoriContextModelSnapshot : ModelSnapshot
+    [Migration("20231231041414_AddStatus")]
+    partial class AddStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -35,6 +38,7 @@ namespace Anzen.Migrations
             modelBuilder.Entity("Anzen.Models.Submission", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AccountName")
@@ -55,11 +59,16 @@ namespace Anzen.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("StatusId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("UwName")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("StatusId");
 
                     b.ToTable("Submission");
                 });
@@ -68,7 +77,7 @@ namespace Anzen.Migrations
                 {
                     b.HasOne("Anzen.Models.Status", "Status")
                         .WithMany()
-                        .HasForeignKey("Id")
+                        .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

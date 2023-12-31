@@ -11,6 +11,7 @@ namespace Anzen.Data
         }
 
         public DbSet<Submission> Submission { get; set; } = null!;
+        public DbSet<Status> Status { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

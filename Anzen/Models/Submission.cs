@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Anzen.Models
 {
@@ -23,5 +24,10 @@ namespace Anzen.Models
 
         [Required]
         public string? Sic { get; set; } = null!;
-    }
+
+        [Required]
+        [ForeignKey("Id")]
+        public Status Status { get; set; } = null!;
+    }
+
 }
