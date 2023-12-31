@@ -30,4 +30,20 @@ app.MapGet("/submissions", async (SatoriContext context, int page = 1, int pageS
     return submissions;
 });
 
+
+app.MapGet("/submissions/{id}", async (string id, HttpContext httpContext) =>
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<SatoriContext>();
+    var submission = await context.Submission
+            .FirstOrDefaultAsync(s => s.Id == int.Parse(id));
+
+    if (submission is null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(submission);
+});
+
 app.Run();
