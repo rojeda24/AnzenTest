@@ -17,19 +17,19 @@ namespace Anzen.Models
         public decimal? Premium { get; set; } = null!;
 
         [Required]
-        public DateOnly EffectiveDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public DateOnly EffectiveDate { get; set; }
 
         [Required]
-        public DateOnly ExpirationDate { get; set; } = DateOnly.FromDateTime(new DateTime(DateTime.Today.Year + 1, DateTime.Today.Month, DateTime.Today.Day));
+        public DateOnly ExpirationDate { get; set; }
 
         [Required]
         public string? Sic { get; set; } = null!;
 
         [Required]
         [ForeignKey("StatusId")]
-        public Status Status { get; set; } = null!;
+        public Status Status { get; } = null!;
 
-        public List<Coverage> Coverages { get; set; } = new();
+        public List<Coverage> Coverages { get; } = new();
     }
 
 }

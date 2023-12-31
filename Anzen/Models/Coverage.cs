@@ -10,7 +10,7 @@ namespace Anzen.Models
         [Required]
         public string Name { get; set; } = null!;
         [JsonIgnore]
-        public List<Submission> Submissions { get; set; } = new();
+        public List<Submission> Submissions { get; } = new();
 
     }
 }
