@@ -5,11 +5,7 @@ namespace Anzen.Data
 {
     public class SatoriContext : DbContext
     {
-        public SatoriContext(DbContextOptions<SatoriContext> options)
-            : base(options)
-        {
-        }
-
+        public SatoriContext(DbContextOptions<SatoriContext> options) : base(options){}
         public DbSet<Submission> Submission { get; set; } = null!;
         public DbSet<Status> Status { get; set; } = null!;
         public DbSet<Coverage> Coverage { get; set; } = null!;

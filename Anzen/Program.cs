@@ -3,8 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Adding services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<SatoriContext>(options => 
@@ -12,24 +11,30 @@ builder.Services.AddDbContext<SatoriContext>(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configuration of the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-
+//Note: On bigger projects, I would use a controller pattern
 app.MapGet("/submissions", async (SatoriContext context, int page = 1, int pageSize = 10) =>
 {
-    var submissions = await context.Submission
-        .Include(s => s.Status)
-        .Include(s => s.Coverages)
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize)
-        .ToListAsync();
+    var submissions = context.Submission
+    .Include(s => s.Status)
+    .Include(s => s.Coverages)
+    .Skip((page - 1) * pageSize)
+    .Take(pageSize);
 
-    return submissions;
+    if (true)
+        submissions.OrderBy(s => s.AccountName);
+    else
+        submissions = submissions.OrderByDescending(s => s.AccountName);
+
+    var result = await submissions.ToListAsync();
+
+    return result;
 });
 
 
