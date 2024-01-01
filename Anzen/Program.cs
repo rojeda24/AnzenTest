@@ -1,5 +1,7 @@
 using Anzen.Data;
+using Anzen.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,22 +21,48 @@ if (app.Environment.IsDevelopment())
 }
 
 //Note: On bigger projects, I would use a controller pattern
-app.MapGet("/submissions", async (SatoriContext context, int page = 1, int pageSize = 10) =>
+
+app.MapGet("/submissions", async (
+HttpContext httpContext, 
+int page = 1, 
+int pageSize = 10, 
+string column = "Id", 
+bool asc = true) =>
 {
+    //Create a map with a string key that stores a lampda expression
+    //I didn't include Premium$ because SQLite doesn't support ordering by decimals
+    var columnMap = new Dictionary<string, Expression<Func<Submission, object>>>
+    {
+        ["Id"] = s => s.Id,
+        ["AccountName"] = s => s.AccountName,
+        ["UwName"] = s => s.UwName,
+        ["EffectiveDate"] = s => s.EffectiveDate,
+        ["ExpirationDate"] = s => s.ExpirationDate,
+        ["Sic"] = s => s.Sic
+    };
+
+    //check if the column exists in the map
+    if (!columnMap.ContainsKey(column))
+    {
+        return Results.BadRequest($"Invalid column name: {column}");
+    }
+
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<SatoriContext>();
     var submissions = context.Submission
     .Include(s => s.Status)
     .Include(s => s.Coverages)
     .Skip((page - 1) * pageSize)
     .Take(pageSize);
 
-    if (true)
-        submissions.OrderBy(s => s.AccountName);
+    if (asc)
+        submissions = submissions.OrderBy(columnMap[column]);
     else
-        submissions = submissions.OrderByDescending(s => s.AccountName);
+        submissions = submissions.OrderByDescending(columnMap[column]);
 
     var result = await submissions.ToListAsync();
 
-    return result;
+    return Results.Ok(result);
 });
 
 
