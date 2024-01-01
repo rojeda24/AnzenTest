@@ -1,4 +1,17 @@
- **Anzen API Documentation**
+# How to read my code
+My code was made using .NET Core 8.0 implementing an Object-Relational Mapping (Entity Framework), Models, a repository pattern using DbSet. Is connected to a SQLite database with the name **satori.db** that is loaded with dummy data. The database was auto-generated using Migrations and LINQ.
+
+Every new commit is related with each implementation, fix or refactor I did. Is a good way to check my progress.
+
+Most of the logic is in **Program.cs** in a minimalAPI (avoiding Controllers because of the simplicity of the code).
+
+I created a **Model** for each table, to define attributes, some of the relationships and to handle data. All of them inside **Models/** directory.
+
+Inside Data/**SatoriContext.cs** you can find the database session and some configuration with the relationships between.
+
+Thanks for your time. Have an amazing new year!
+
+# Anzen API Documentation (With the help of Swagger and LLMs like Copilot 🤪)
 
 **API Version:** 1.0
 
@@ -6,7 +19,7 @@
 
 **Endpoints:**
 
-**1. GET /submissions**
+##**1. GET /submissions**
 
 **Description:** Retrieves a list of submissions.
 
@@ -88,7 +101,7 @@ curl -X GET 'http://localhost:5224/submissions?page=2&pageSize=2&column=Id&asc=t
 ]
 ```
 
-**2. GET /submissions/{id}**
+## **2. GET /submissions/{id}**
 
 **Description:** Retrieves a specific submission by its ID.
 
@@ -120,13 +133,32 @@ curl -X GET 'http://localhost:5224/search/Floyd%20Miles' -H 'accept: */*'
 
 ```json
 {
-
-\
+  "id": 1,
+  "accountName": "ACME Technologies",
+  "uwName": "a Floyd Miles 2nd",
+  "premium": 12000,
+  "effectiveDate": "2023-02-02",
+  "expirationDate": "2023-02-02",
+  "sic": "01011 Iron Ores",
+  "status": {
+    "id": 1,
+    "name": "New"
+  },
+  "coverages": [
+    {
+      "id": 1,
+      "name": "EPLI"
+    },
+    {
+      "id": 2,
+      "name": "D&O"
+    }
+  ]
 }
 ```
 Based on the fragment of the `swagger.json` you provided, it seems like you've added a new endpoint for searching submissions. Here's how you can document this new endpoint in your `README.MD`:
 
-**3. GET /search/{search}**
+## **3. GET /search/{search}**
 
 **Description:** Searches submissions based on the provided search term.
     * Submission information checked:
