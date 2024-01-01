@@ -14,7 +14,7 @@
 
 * **page** (integer, optional, default=1): The page number to retrieve.
 * **pageSize** (integer, optional, default=10): The number of submissions per page.
-* **column** (string, optional, default="Id"): The column to sort by.
+* **columnToSort** (string, optional, default="Id"): The column to sort by.
     * Possible string values:
         * **Id**
         * **AccountName**
@@ -113,31 +113,96 @@ curl -X GET 'http://localhost:5224/submissions?page=2&pageSize=2&column=Id&asc=t
 **Example Request:**
 
 ```bash
-curl -X GET 'http://localhost:5224/submissions/10' -H 'accept: */*'
+curl -X GET 'http://localhost:5224/search/Floyd%20Miles' -H 'accept: */*'
 ```
 
 **Example Response:**
 
 ```json
 {
-  "id": 10,
-  "accountName": "ACME Technologies 9",
-  "uwName": "Floyd Miles 9",
-  "premium": 20000,
-  "effectiveDate": "2023-10-10",
-  "expirationDate": "2023-10-10",
-  "sic": "01019 Iron Ores",
-  "status": {
+
+\
+}
+```
+Based on the fragment of the `swagger.json` you provided, it seems like you've added a new endpoint for searching submissions. Here's how you can document this new endpoint in your `README.MD`:
+
+**3. GET /search/{search}**
+
+**Description:** Searches submissions based on the provided search term.
+    * Submission information checked:
+        * **AccountName**
+        * **UwName**
+        * **EffectiveDate**
+        * **ExpirationDate**
+        * **Sic** 
+        * **Premium💸** 
+
+**Parameters:**
+
+* **search** (string, required): The search term to use for finding submissions.
+* **page** (integer, optional, default=1): The page number to retrieve.
+* **pageSize** (integer, optional, default=10): The number of submissions per page.
+
+**Response:**
+
+* **Status:** 200 (Success)
+* **Body:** An array of submissions that match the search term, each containing the following fields:
+    * id
+    * accountName
+    * uwName
+    * premium
+    * effectiveDate
+    * expirationDate
+    * sic
+    * status (status with key and name field. In database: 1=New, 2=In Progress 3=Done)
+    * coverages (list of objects with id and name fields)
+
+**Example Request:**
+
+```bash
+curl -X GET 'http://localhost:5224/search/{search}?page=1&pageSize=10' -H 'accept: */*'
+```
+
+**Example Response:**
+
+```json
+[
+  {
     "id": 1,
-    "name": "New"
-  },
-  "coverages": [{
+    "accountName": "ACME Technologies",
+    "uwName": "a Floyd Miles 2nd",
+    "premium": 12000,
+    "effectiveDate": "2023-02-02",
+    "expirationDate": "2023-02-02",
+    "sic": "01011 Iron Ores",
+    "status": {
+      "id": 1,
+      "name": "New"
+    },
+    "coverages": [
+      {
         "id": 1,
         "name": "EPLI"
       },
       {
         "id": 2,
         "name": "D&O"
-  }]
-}
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "accountName": "ZenithWay",
+    "uwName": "Floyd Miles",
+    "premium": 10000,
+    "effectiveDate": "2023-03-03",
+    "expirationDate": "2024-03-03",
+    "sic": "01012 Dummy Industry",
+    "status": {
+      "id": 2,
+      "name": "In Progress"
+    },
+    "coverages": []
+  }
+]
 ```
