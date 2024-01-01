@@ -1,5 +1,6 @@
 using Anzen.Data;
 using Anzen.Models;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -22,16 +23,12 @@ if (app.Environment.IsDevelopment())
 
 //Note: On bigger projects, I would use a controller pattern
 
-app.MapGet("/submissions", async (
-HttpContext httpContext, 
-int page = 1, 
-int pageSize = 10, 
-string column = "Id", 
-bool asc = true) =>
+//Get all submissions with pagination and sorting
+app.MapGet("/submissions", async ( HttpContext httpContext, int page = 1, int pageSize = 10, string columnToSort = "Id", bool asc = true) =>
 {
-    //Create a map with a string key that stores a lampda expression
-    //I didn't include Premium$ because SQLite doesn't support ordering by decimals
-    var columnMap = new Dictionary<string, Expression<Func<Submission, object>>>
+    //Create a dictionary (map) with all possible columns to sort
+    //I didn't include Premium ($) because SQLite doesn't support ordering by decimals
+    var columnsToSortDictionary = new Dictionary<string, Expression<Func<Submission, object>>>
     {
         ["Id"] = s => s.Id,
         ["AccountName"] = s => s.AccountName,
@@ -41,38 +38,39 @@ bool asc = true) =>
         ["Sic"] = s => s.Sic
     };
 
-    //check if the column exists in the map
-    if (!columnMap.ContainsKey(column))
+    //Check if the columnToSort exists in the dictionary
+    if (!columnsToSortDictionary.ContainsKey(columnToSort))
     {
-        return Results.BadRequest($"Invalid column name: {column}");
+        return Results.BadRequest($"Invalid columnToSort name: {columnToSort}");
     }
 
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<SatoriContext>();
-    var submissions = context.Submission
-    .Include(s => s.Status)
-    .Include(s => s.Coverages)
-    .Skip((page - 1) * pageSize)
+    var submissions = context.Submission //Return Submission information
+    .Include(s => s.Status) //Include the Status  of the Submission
+    .Include(s => s.Coverages) //Include the Coverages of the Submission
+
+    //Paginate the results
+    .Skip((page - 1) * pageSize) 
     .Take(pageSize);
 
+    //Sort the results by one of the columns in the dictionary
     if (asc)
-        submissions = submissions.OrderBy(columnMap[column]);
+        submissions = submissions.OrderBy(columnsToSortDictionary[columnToSort]);
     else
-        submissions = submissions.OrderByDescending(columnMap[column]);
+        submissions = submissions.OrderByDescending(columnsToSortDictionary[columnToSort]);
 
-    var result = await submissions.ToListAsync();
-
-    return Results.Ok(result);
+    return Results.Ok(await submissions.ToListAsync());
 });
 
-
+//Get a specific submission
 app.MapGet("/submissions/{id}", async (string id, HttpContext httpContext) =>
 {
     using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<SatoriContext>();
-    var submission = await context.Submission
-        .Include(s => s.Status)
-        .Include(s => s.Coverages)
+    var submission = await context.Submission //Return Submission information
+        .Include(s => s.Status) //Include the Status  of the Submission
+        .Include(s => s.Coverages) //Include the Coverages of the Submission
         .FirstOrDefaultAsync(s => s.Id == int.Parse(id));
 
     if (submission is null)
@@ -82,5 +80,36 @@ app.MapGet("/submissions/{id}", async (string id, HttpContext httpContext) =>
 
     return Results.Ok(submission);
 });
+
+//Search all with pagination
+app.MapGet("/search/{search}", async (string search, HttpContext httpContext, int page = 1, int pageSize = 10) =>
+{
+    using var scope = app.Services.CreateScope();
+    var context = scope.ServiceProvider.GetRequiredService<SatoriContext>();
+    var submissions = await context.Submission //Return Submission information
+        .Include(s => s.Status) //Include the Status  of the Submission
+        .Include(s => s.Coverages)  //Include the Coverages of the Submission
+
+        //Search by AccountName, UwName, Premium($), EffectiveDate, ExpirationDate, Sic
+        .Where(s => s.AccountName.ToLower().Contains(search.ToLower())
+        || s.UwName.ToLower().Contains(search.ToLower())
+        || s.Premium.ToString().Contains(search)
+        || s.EffectiveDate.ToString().ToLower().Contains(search.ToLower())
+        || s.ExpirationDate.ToString().ToLower().Contains(search.ToLower())
+        || s.Sic.ToLower().Contains(search.ToLower()))
+
+        //Paginate the results
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
+
+    if (submissions is null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Ok(submissions);
+});
+
 
 app.Run();

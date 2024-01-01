@@ -1,26 +1,20 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-#Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
-#For more information, please see https://aka.ms/containercompat
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-1809 AS base
+# Base image for ASP.NET Core 8.0 on Windows
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-nanoserver-20H2 AS base
 WORKDIR /app
-EXPOSE 8080
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-nanoserver-1809 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["Anzen/Anzen.csproj", "Anzen/"]
-RUN dotnet restore "./Anzen/./Anzen.csproj"
+# Install SQLite (using PowerShell)
+RUN powershell -Command Invoke-WebRequest -Uri https://github.com/nuget/NuGet.Client/releases/download/4.9.3/NuGet.exe -OutFile nuget.exe; \
+    Start-Process .\nuget.exe install packages.sqlite -Source https://api.nuget.org/v3/index.json -OutputDirectory .\tools
+
+# Copy project files and database
 COPY . .
-WORKDIR "/src/Anzen"
-RUN dotnet build "./Anzen.csproj" -c %BUILD_CONFIGURATION% -o /app/build
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Anzen.csproj" -c %BUILD_CONFIGURATION% -o /app/publish /p:UseAppHost=false
+# Build the application
+RUN dotnet restore
+RUN dotnet publish -c Release -o out
 
+# Final image for running the application
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Anzen.dll"]
+COPY --from=base /app/out .
+ENTRYPOINT ["dotnet", "aspnetapp.dll"]
